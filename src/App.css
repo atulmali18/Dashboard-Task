@@ -1,0 +1,4 @@
+/* Reset Vite starter styles that conflict with Tailwind layout */
+#root { max-width: unset; margin: 0; padding: 0; text-align: unset; }
+.logo, .read-the-docs { display: none; }
+.card { padding: 0; }

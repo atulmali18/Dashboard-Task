@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { dashboardStats, revenueTrend, salesByProduct, trafficSources, transactions } from '../data/mockData.js'
+import { dashboardStats, revenueTrend, salesByProduct, trafficSources, transactions, users } from '../data/mockData.js'
 
 // Simulated API layer. Each call returns a Promise with slight delay.
 
@@ -37,6 +37,10 @@ export function getTrafficSources() {
 
 export function getTransactions() {
   return simulate(transactions, 450)
+}
+
+export function getUsers() {
+  return simulate(users, 350)
 }
 
 

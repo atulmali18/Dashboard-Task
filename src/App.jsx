@@ -1,8 +1,12 @@
 import { useState } from 'react'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import './App.css'
 import Navbar from './components/Navbar.jsx'
 import Sidebar from './components/Sidebar.jsx'
-import KpiCard from './components/KpiCard.jsx'
+import Dashboard from './pages/Dashboard.jsx'
+import Reports from './pages/Reports.jsx'
+import Users from './pages/Users.jsx'
+import Settings from './pages/Settings.jsx'
 
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -19,13 +23,14 @@ function App() {
       <div className="flex-1 flex flex-col">
         <Navbar onMenu={() => setSidebarOpen((v) => !v)} />
         <main className="p-4 sm:p-6 lg:p-8 space-y-6">
-          <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">Dashboard</h1>
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-            <KpiCard title="Revenue" value={128430} delta={5.4} icon="BanknotesIcon" />
-            <KpiCard title="Active Users" value={8421} delta={2.1} icon="UserGroupIcon" />
-            <KpiCard title="Conversion" value={'3.8%'} delta={-0.4} icon="BoltIcon" />
-            <KpiCard title="New Leads" value={392} delta={6.3} icon="UserPlusIcon" />
-          </div>
+          <Routes>
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/reports" element={<Reports />} />
+            <Route path="/users" element={<Users />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          </Routes>
         </main>
       </div>
     </div>

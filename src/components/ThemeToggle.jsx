@@ -5,7 +5,7 @@ export default function ThemeToggle() {
 	const [theme, setTheme] = useState(() => {
 		const stored = localStorage.getItem('theme')
 		if (stored) return stored
-		const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+		const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches
 		return prefersDark ? 'dark' : 'light'
 	})
 

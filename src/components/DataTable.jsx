@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from 'react'
-import { ChevronUpDownIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid'
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline'
+import { ChevronUpDownIcon } from '@heroicons/react/24/solid'
 
 function compare(a, b, type) {
   if (type === 'number') return a - b
@@ -48,19 +47,25 @@ export default function DataTable({
     if (!col.sortable) return
     setPage(1)
     setSort((s) => {
-      if (s.key !== col.key) return { key: col.key, dir: 'asc', type: col.sortType || 'string' }
-      return { key: col.key, dir: s.dir === 'asc' ? 'desc' : 'asc', type: col.sortType || 'string' }
+      if (s.key !== col.key) {
+        return { key: col.key, dir: 'asc', type: col.sortType || 'string' }
+      }
+      return {
+        key: col.key,
+        dir: s.dir === 'asc' ? 'desc' : 'asc',
+        type: col.sortType || 'string'
+      }
     })
   }
 
   return (
-    <div className="space-y-4">
-      {/* Search */}
-      <div className="relative w-full max-w-xs">
-        <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+    <div className="space-y-3">
+      {/* 🔍 Search */}
+      <div className="flex items-center gap-2">
+        <label htmlFor="table-search" className="sr-only">Search</label>
         <input
           id="table-search"
-          className="w-full pl-9 pr-3 py-2 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+          className="input"
           placeholder={searchPlaceholder}
           value={query}
           onChange={(e) => { setPage(1); setQuery(e.target.value) }}
@@ -68,26 +73,38 @@ export default function DataTable({
         />
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-700">
-        <table className="w-full text-sm text-left">
-          <thead className="bg-slate-100 dark:bg-slate-800/70 text-slate-700 dark:text-slate-200 text-xs uppercase">
+      {/* 📊 Table */}
+      <div className="overflow-x-auto">
+        <table className="table w-full border-collapse" role="table" aria-label={ariaLabel}>
+          <thead>
             <tr>
               {columns.map((col) => (
-                <th key={col.key} className="px-4 py-3 font-semibold">
+                <th key={col.key} className="text-left px-3 py-2 text-sm font-semibold text-slate-600 dark:text-slate-300">
                   <button
                     type="button"
-                    className={`inline-flex items-center gap-1 ${col.sortable ? 'hover:text-brand-500' : 'cursor-default'}`}
+                    className={`inline-flex items-center gap-1 ${
+                      col.sortable ? 'hover:underline' : 'cursor-default'
+                    }`}
                     onClick={() => toggleSort(col)}
-                    aria-sort={sort.key === col.key ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}
+                    aria-sort={
+                      sort.key === col.key
+                        ? (sort.dir === 'asc' ? 'ascending' : 'descending')
+                        : 'none'
+                    }
                   >
                     <span>{col.label}</span>
                     {col.sortable && (
-                      <ChevronUpDownIcon
-                        className={`h-4 w-4 transition ${
-                          sort.key === col.key ? 'text-brand-500' : 'text-slate-400'
-                        }`}
-                      />
+                      <>
+                        {sort.key !== col.key && (
+                          <ChevronUpDownIcon className="h-4 w-4 text-slate-400" />
+                        )}
+                        {sort.key === col.key && sort.dir === 'asc' && (
+                          <ChevronUpDownIcon className="h-4 w-4 text-brand-500 rotate-180" />
+                        )}
+                        {sort.key === col.key && sort.dir === 'desc' && (
+                          <ChevronUpDownIcon className="h-4 w-4 text-brand-500" />
+                        )}
+                      </>
                     )}
                   </button>
                 </th>
@@ -95,53 +112,35 @@ export default function DataTable({
             </tr>
           </thead>
           <tbody>
-            {current.length > 0 ? (
-              current.map((row, idx) => (
-                <tr
-                  key={row.id || idx}
-                  className={`border-t border-slate-100 dark:border-slate-700 ${
-                    idx % 2 === 0 ? 'bg-white dark:bg-slate-900' : 'bg-slate-50 dark:bg-slate-800/40'
-                  } hover:bg-brand-50 dark:hover:bg-brand-900/30 transition cursor-pointer`}
-                  onClick={() => onRowClick && onRowClick(row)}
-                >
-                  {columns.map((col) => (
-                    <td key={col.key} className="px-4 py-3">
-                      {col.render ? col.render(row[col.key], row) : String(row[col.key])}
-                    </td>
-                  ))}
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={columns.length} className="px-4 py-6 text-center text-slate-500">
-                  No results found
-                </td>
+            {current.map((row) => (
+              <tr
+                key={row.id || JSON.stringify(row)}
+                className="hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer"
+                onClick={() => onRowClick && onRowClick(row)}
+                tabIndex={0}
+                aria-label="View details"
+              >
+                {columns.map((col) => (
+                  <td key={col.key} className="px-3 py-2 text-sm">
+                    {col.render ? col.render(row[col.key], row) : String(row[col.key])}
+                  </td>
+                ))}
               </tr>
-            )}
+            ))}
           </tbody>
         </table>
       </div>
 
-      {/* Pagination */}
+      {/* 📑 Pagination */}
       <div className="flex items-center justify-between">
         <p className="text-xs text-slate-500">
           Page {page} of {totalPages} • {sorted.length} results
         </p>
         <div className="flex items-center gap-2">
-          <button
-            className="px-3 py-1 rounded-md border text-sm disabled:opacity-40"
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page === 1}
-          >
-            <ChevronLeftIcon className="h-4 w-4" />
-          </button>
-          <button
-            className="px-3 py-1 rounded-md border text-sm disabled:opacity-40"
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            disabled={page === totalPages}
-          >
-            <ChevronRightIcon className="h-4 w-4" />
-          </button>
+          <button className="btn" onClick={() => setPage(1)} disabled={page === 1}>«</button>
+          <button className="btn" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}>‹</button>
+          <button className="btn" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages}>›</button>
+          <button className="btn" onClick={() => setPage(totalPages)} disabled={page === totalPages}>»</button>
         </div>
       </div>
     </div>
